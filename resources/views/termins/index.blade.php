@@ -7,6 +7,7 @@
         <h1 class="text-3xl font-bold mt-8">Termins</h1>
 
                 <!-- Termin Form -->
+        @can('manage termins')
         <div class="card bg-base-100 shadow mt-8">
             <div class="card-body">
                 <form method="POST" action="/termins">
@@ -86,6 +87,7 @@
                 </form>
             </div>
         </div>
+        @endcan
 
 
         <!-- Feed -->
@@ -94,6 +96,7 @@
                 <div class="card big-base-100 shadow mt-8">
                     <div class="card-body">
 
+                        @can('update', $termin)
                         <div class="flex gap-1">
                             <a href="/termins/{{ $termin->id }}/edit" class="btn btn-ghost btn-xs">
                                 Edit
@@ -108,6 +111,7 @@
                                 </button>
                             </form>
                         </div>
+                        @endcan
 
                         <div>
                             <div class="front-semibold">{{ $termin->room->name }}</div>

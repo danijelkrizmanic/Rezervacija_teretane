@@ -8,6 +8,7 @@
 
         
                 <!-- Room Form -->
+        @can('manage rooms')
         <div class="card bg-base-100 shadow mt-8">
             <div class="card-body">
                 <form method="POST" action="/rooms">
@@ -52,7 +53,7 @@
                 </form>
             </div>
         </div>
-
+        @endcan
 
 
         <!-- Feed -->
@@ -60,7 +61,7 @@
             @forelse ($rooms as $room)
                 <div class="card big-base-100 shadow mt-8">
                     <div class="card-body">
-
+                        @can('manage rooms')
                         <div class="flex gap-1">
                             <a href="/rooms/{{ $room->id }}/edit" class="btn btn-ghost btn-xs">
                                 Edit
@@ -75,7 +76,7 @@
                                 </button>
                             </form>
                         </div>
-
+                        @endcan
 
                         <div>
                             <div class="front-semibold">{{ $room->name }}</div>

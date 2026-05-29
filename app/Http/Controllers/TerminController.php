@@ -44,7 +44,7 @@ class TerminController extends Controller
             'date.required' => 'Please provide a date.',
         ]);
 
-        Termin::create($validated);
+        auth()->user()->termins()->create($validated);
 
         return redirect('/termins')->with('success', 'Your termin has been created!');
     }
