@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Termin;
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use App\Models\User;
 
 class TerminController extends Controller
 {
@@ -13,8 +15,19 @@ class TerminController extends Controller
      */
     public function index()
     {
-        $termins = Termin::with('room')->get();
+        $termins = Termin::with('room', 'reservations')->get();
         $rooms = Room::all();
+        if(auth()->user()->hasRole('admin')){
+            $roles = Role::where('name', 'trainer')->first();
+            $trainers = $roles->users;
+            return view('termins.index', compact('termins', 'rooms', 'trainers'));
+        }
+
+        if(auth()->user()->hasRole('user')){
+            $reservations = auth()->user()->reservations()->get();
+            return view('termins.index', compact('termins', 'rooms', 'reservations'));
+        }
+        
         return view('termins.index', compact('termins', 'rooms'));
     }
 
@@ -33,8 +46,8 @@ class TerminController extends Controller
     {
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
-            'start_time' => 'required|string',
-            'end_time' => 'required|string',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
             'date' => 'required|date'
         ], [
             'room_id.required' => 'Please select a room.',
@@ -44,7 +57,12 @@ class TerminController extends Controller
             'date.required' => 'Please provide a date.',
         ]);
 
-        auth()->user()->termins()->create($validated);
+        $userId = auth()->user()->hasRole('admin') && $request->has('trainer_id') ? $request->input('trainer_id') : auth()->id();
+
+        $this->validateTerminConflicts($userId, $validated);
+
+        $user = User::find($userId);
+        $user->termins()->create($validated);
 
         return redirect('/termins')->with('success', 'Your termin has been created!');
     }
@@ -54,7 +72,7 @@ class TerminController extends Controller
      */
     public function show(Termin $termin)
     {
-        //
+        return view('termins.detiles', compact('termin'));
     }
 
     /**
@@ -84,7 +102,20 @@ class TerminController extends Controller
             'date.required' => 'Please provide a date.',
         ]);
 
-        $termin->update($validated);
+        $userId = auth()->user()->hasRole('admin') && $request->has('trainer_id') ? $request->input('trainer_id') : $termin->user_id;
+
+        $this->validateTerminConflicts(
+            $userId,
+            $validated,
+            $termin->id // ignoriraj trenutni termin
+        );
+
+        $termin->update([
+            ...$validated,
+            'user_id' => $userId,
+        ]);
+
+        // $termin->update($validated);
 
         return redirect('/termins')->with('success', 'Your termin has been updated!');
     }
@@ -98,4 +129,36 @@ class TerminController extends Controller
 
         return redirect('/termins')->with('success', 'Your termin has been deleted!');
     }
+
+    private function validateTerminConflicts(
+    int $userId,
+    array $data,
+    ?int $ignoreTerminId = null
+): void {
+    $userConflict = Termin::where('user_id', $userId)
+        ->where('date', $data['date'])
+        ->when($ignoreTerminId, fn ($query) => $query->where('id', '!=', $ignoreTerminId))
+        ->where('start_time', '<', $data['end_time'])
+        ->where('end_time', '>', $data['start_time'])
+        ->exists();
+
+    if ($userConflict) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'start_time' => 'Već imate termin u tom vremenu.'
+        ]);
+    }
+
+    $roomConflict = Termin::where('room_id', $data['room_id'])
+        ->where('date', $data['date'])
+        ->when($ignoreTerminId, fn ($query) => $query->where('id', '!=', $ignoreTerminId))
+        ->where('start_time', '<', $data['end_time'])
+        ->where('end_time', '>', $data['start_time'])
+        ->exists();
+
+    if ($roomConflict) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'room_id' => 'Soba je već rezervirana u tom vremenu.'
+        ]);
+    }
+}
 }

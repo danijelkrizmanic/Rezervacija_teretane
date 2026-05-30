@@ -9,6 +9,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function(){
     Route::resource('rooms', \App\Http\Controllers\RoomController::class);
     Route::resource('termins', \App\Http\Controllers\TerminController::class);
+    Route::resource('reservations', \App\Http\Controllers\ReservationController::class);
 });
 
 Route::view('/register', 'auth.register')

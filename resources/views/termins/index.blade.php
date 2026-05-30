@@ -72,12 +72,23 @@
                             </div>
                         @enderror
                     </div>
-                        @error('start_time')
+
+                    @can('manage termins for trainers')
+                    <div class="form-control w-full mt-4">
+                        <select name="trainer_id" class="select select-bordered w-full @error('trainer_id') input-error @enderror" required>
+                            <option disabled selected>Select a trainer</option>
+                            @foreach ($trainers as $trainer)
+                                <option value="{{ $trainer->id }}" {{ old('trainer_id') == $trainer->id ? 'selected' : '' }}>{{ $trainer->name }}</option>
+                            @endforeach
+                        </select>
+
+                        @error('trainer_id')
                             <div class="label">
                                 <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>  
+                            </div>
                         @enderror
                     </div>
+                    @endcan
 
                     <div class="mt-4 flex items-center justify-end">
                         <button type="submit" class="btn btn-primary btn-sm">
@@ -98,6 +109,8 @@
 
                         @can('update', $termin)
                         <div class="flex gap-1">
+                            <a href="/termins/{{ $termin->id }}" class="btn btn-ghost btn-xs">
+                                View</a>
                             <a href="/termins/{{ $termin->id }}/edit" class="btn btn-ghost btn-xs">
                                 Edit
                             </a>
@@ -113,9 +126,37 @@
                         </div>
                         @endcan
 
+                        @role('user')
+                        <div class="flex gap-1">
+                            @if($reservations->contains('termin_id', $termin->id))
+                                <form method="POST" action="/reservations/{{ $reservations->where('termin_id', $termin->id)->first()->id }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        onclick="return confirm('Are you sure you want to cancel your reservation?')"
+                                        class="btn btn-ghost btn-xs text-error">
+                                        Cancel Reservation
+                                    </button>
+                                </form>
+                            @elseif($termin->reservations->count() < $termin->room->max_capacity)
+                            <form method="POST" action="/reservations">
+                                @csrf
+                                <input type="hidden" name="termin_id" value="{{ $termin->id }}">
+                                <button type="submit"
+                                    class="btn btn-ghost btn-xs text-error">
+                                    Reserve
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+                        @endrole
+
+
                         <div>
                             <div class="front-semibold">{{ $termin->room->name }}</div>
                             <div class="mt-1">{{ $termin->date }} starts at {{ $termin->start_time }} and ends at {{ $termin->end_time }}</div>
+                            <div class="mt-1">Max capacity: {{ $termin->room->max_capacity }}</div>
+                            <div class="mt-1">Reserved: {{ $termin->reservations->count() }}</div>
                             <div class="text-sm text-gray-500 mt-2"></div>
                         </div>
                     </div>
