@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Termin extends Model
 {
     protected $fillable = [
+        'user_id',
         'room_id',
         'start_time',
         'end_time',
@@ -25,7 +26,7 @@ class Termin extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function reservations()
+    public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
     }

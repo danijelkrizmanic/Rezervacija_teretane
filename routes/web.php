@@ -1,33 +1,51 @@
 <?php
 
+use App\Http\Controllers\Auth\Login;
+use App\Http\Controllers\Auth\Logout;
+use App\Http\Controllers\Auth\Register;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\TerminController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Spatie\Permission\Models\Role;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::view('/', 'welcome');
 
-Route::middleware('auth')->group(function(){
-    Route::resource('rooms', \App\Http\Controllers\RoomController::class);
-    Route::resource('termins', \App\Http\Controllers\TerminController::class);
-    Route::resource('reservations', \App\Http\Controllers\ReservationController::class);
-});
+Route::middleware('auth')->group(function (): void {
+    Route::resource('termins', TerminController::class)
+        ->only(['index'])
+        ->middleware('role:user|trainer|admin');
 
-Route::middleware('role:admin')->group(function () {
-    Route::resource('users', \App\Http\Controllers\UserController::class);
+    Route::resource('termins', TerminController::class)
+        ->only(['store', 'show', 'edit', 'update', 'destroy'])
+        ->middleware('role:trainer|admin');
+
+    Route::resource('rooms', RoomController::class)
+        ->only(['index', 'store', 'edit', 'update', 'destroy'])
+        ->middleware('role:trainer|admin');
+
+    Route::resource('reservations', ReservationController::class)
+        ->only(['index', 'store', 'destroy'])
+        ->middleware('role:user');
+
+    Route::put('reservations/{reservation}', [ReservationController::class, 'update'])
+        ->name('reservations.update')
+        ->middleware('role:trainer|admin');
+
+    Route::resource('users', UserController::class)
+        ->only(['index', 'edit', 'update'])
+        ->middleware('role:admin');
+
+    Route::post('/logout', Logout::class);
 });
 
 Route::view('/register', 'auth.register')
     ->middleware('guest');
-Route::post('/register', \App\Http\Controllers\Auth\Register::class)
+Route::post('/register', Register::class)
     ->middleware('guest');
 
 Route::view('/login', 'auth.login')
     ->middleware('guest')
     ->name('login');
-Route::post('/login', \App\Http\Controllers\Auth\Login::class)
+Route::post('/login', Login::class)
     ->middleware('guest');
-
-Route:: post('/logout', \App\Http\Controllers\Auth\Logout::class)
-    ->middleware('auth');
-

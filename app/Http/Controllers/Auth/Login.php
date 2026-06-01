@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,9 +12,9 @@ class Login extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): RedirectResponse
     {
-         // Validate the input
+        // Validate the input
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -25,7 +26,7 @@ class Login extends Controller
             $request->session()->regenerate();
 
             // Redirect to intended page or home
-            return redirect()->intended('/rooms')->with('success', 'Welcome back!');
+            return redirect()->intended('/termins')->with('success', 'Welcome back!');
         }
 
         // If login fails, redirect back with error

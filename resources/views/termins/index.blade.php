@@ -1,176 +1,149 @@
 <x-layout>
     <x-slot:title>
-        Home Feed
+        Termins
     </x-slot:title>
 
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mt-8">Termins</h1>
+    <div class="space-y-8">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase text-primary">Schedule</p>
+                <h1 class="text-3xl font-bold">Termins</h1>
+                <p class="mt-2 text-base-content/70">Browse available sessions and manage gym scheduling by role.</p>
+            </div>
+            <div class="stats w-full border border-base-300 bg-base-100 shadow-sm sm:w-auto">
+                <div class="stat">
+                    <div class="stat-title">Scheduled</div>
+                    <div class="stat-value text-2xl">{{ $termins->count() }}</div>
+                </div>
+            </div>
+        </div>
 
-                <!-- Termin Form -->
         @can('manage termins')
-        <div class="card bg-base-100 shadow mt-8">
-            <div class="card-body">
-                <form method="POST" action="/termins">
+            <div class="rounded-lg border border-base-300 bg-base-100 p-5 shadow-sm">
+                <form method="POST" action="{{ route('termins.store') }}" class="grid gap-4 lg:grid-cols-5 lg:items-end">
                     @csrf
-                    <div class="form-control w-full">
-                        <select name="room_id" class="select select-bordered w-full @error('room_id') input-error @enderror" required>
-                            <option disabled selected>Select a room</option>
-                            @foreach ($rooms as $room)
-                                <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>{{ $room->name }}</option>
-                            @endforeach
-                        </select>
 
-                        @error('room_id')
-                            <div class="label">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
-                    </div>
+                    <x-form.select-input label="Room" name="room_id" placeholder="Select a room" required>
+                        @foreach ($rooms as $room)
+                            <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>{{ $room->name }}</option>
+                        @endforeach
+                    </x-form.select-input>
 
-                    <div class="form-control w-full mt-4">
-
-                        <input type="text"
-                            name="start_time"
-                            placeholder="Start time"
-                            class="input input-bordered w-full @error('start_time') input-error @enderror"
-                            required
-                        >{{ old('start_time') }}</input>
-
+                    <label class="form-control w-full">
+                        <div class="label">
+                            <span class="label-text font-medium">Start time</span>
+                        </div>
+                        <input type="time" name="start_time" value="{{ old('start_time') }}" class="input input-bordered w-full bg-base-100 @error('start_time') input-error @enderror" required>
                         @error('start_time')
                             <div class="label">
                                 <span class="label-text-alt text-error">{{ $message }}</span>
                             </div>
                         @enderror
-                    </div>
+                    </label>
 
-                    <div class="form-control w-full mt-4">
-                        <input type="text"
-                            name="end_time"
-                            placeholder="End time"
-                            class="input input-bordered w-full @error('end_time') input-error @enderror"
-                            required
-                        >{{ old('end_time') }}</input>
-
+                    <label class="form-control w-full">
+                        <div class="label">
+                            <span class="label-text font-medium">End time</span>
+                        </div>
+                        <input type="time" name="end_time" value="{{ old('end_time') }}" class="input input-bordered w-full bg-base-100 @error('end_time') input-error @enderror" required>
                         @error('end_time')
                             <div class="label">
                                 <span class="label-text-alt text-error">{{ $message }}</span>
                             </div>
                         @enderror
-                    </div>
+                    </label>
 
-                    <div class="form-control w-full mt-4">
-                        <input type="date"
-                            name="date"
-                            placeholder="Date"
-                            class="input input-bordered w-full @error('date') input-error @enderror"
-                            required
-                        >{{ old('date') }}</input>
-
-                        @error('date')
-                            <div class="label">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
-                    </div>
+                    <x-form.date-input label="Date" name="date" required />
 
                     @can('manage termins for trainers')
-                    <div class="form-control w-full mt-4">
-                        <select name="trainer_id" class="select select-bordered w-full @error('trainer_id') input-error @enderror" required>
-                            <option disabled selected>Select a trainer</option>
+                        <x-form.select-input label="Trainer" name="trainer_id" placeholder="Select a trainer" required>
                             @foreach ($trainers as $trainer)
                                 <option value="{{ $trainer->id }}" {{ old('trainer_id') == $trainer->id ? 'selected' : '' }}>{{ $trainer->name }}</option>
                             @endforeach
-                        </select>
-
-                        @error('trainer_id')
-                            <div class="label">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
-                    </div>
+                        </x-form.select-input>
+                    @else
+                        <button type="submit" class="btn btn-primary">Create Termin</button>
                     @endcan
 
-                    <div class="mt-4 flex items-center justify-end">
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            Create Termin
-                        </button>
-                    </div>
+                    @can('manage termins for trainers')
+                        <div class="lg:col-start-5">
+                            <button type="submit" class="btn btn-primary w-full">Create Termin</button>
+                        </div>
+                    @endcan
                 </form>
             </div>
-        </div>
         @endcan
 
-
-        <!-- Feed -->
-        <div class="space-y-4 mt-8">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($termins as $termin)
-                <div class="card big-base-100 shadow mt-8">
-                    <div class="card-body">
+                @php
+                    $reservedCount = $termin->reservations->count();
+                    $capacity = $termin->room->max_capacity;
+                    $userReservation = isset($reservations) ? $reservations->firstWhere('termin_id', $termin->id) : null;
+                @endphp
 
-                        @can('update', $termin)
-                        <div class="flex gap-1">
-                            <a href="/termins/{{ $termin->id }}" class="btn btn-ghost btn-xs">
-                                View</a>
-                            <a href="/termins/{{ $termin->id }}/edit" class="btn btn-ghost btn-xs">
-                                Edit
-                            </a>
-                            <form method="POST" action="/termins/{{ $termin->id }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    onclick="return confirm('Are you sure you want to delete this termin?')"
-                                    class="btn btn-ghost btn-xs text-error">
-                                    Delete
-                                </button>
-                            </form>
+                <div class="card border border-base-300 bg-base-100 shadow-sm">
+                    <div class="card-body gap-5">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="card-title">{{ $termin->room->name }}</h2>
+                                <p class="text-sm text-base-content/60">{{ $termin->user?->name ?? 'Trainer pending' }}</p>
+                            </div>
+                            <div class="badge {{ $reservedCount >= $capacity ? 'badge-error' : 'badge-primary' }} badge-outline">
+                                {{ $reservedCount }}/{{ $capacity }}
+                            </div>
                         </div>
-                        @endcan
 
-                        @role('user')
-                        <div class="flex gap-1">
-                            @if($reservations->contains('termin_id', $termin->id))
-                                <form method="POST" action="/reservations/{{ $reservations->where('termin_id', $termin->id)->first()->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        onclick="return confirm('Are you sure you want to cancel your reservation?')"
-                                        class="btn btn-ghost btn-xs text-error">
-                                        Cancel Reservation
-                                    </button>
-                                </form>
-                            @elseif($termin->reservations->count() < $termin->room->max_capacity)
-                            <form method="POST" action="/reservations">
-                                @csrf
-                                <input type="hidden" name="termin_id" value="{{ $termin->id }}">
-                                <button type="submit"
-                                    class="btn btn-ghost btn-xs text-error">
-                                    Reserve
-                                </button>
-                            </form>
-                            @endif
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div class="rounded-lg bg-base-200 p-3">
+                                <div class="text-base-content/50">Date</div>
+                                <div class="font-semibold">{{ \Carbon\Carbon::parse($termin->date)->format('M d, Y') }}</div>
+                            </div>
+                            <div class="rounded-lg bg-base-200 p-3">
+                                <div class="text-base-content/50">Time</div>
+                                <div class="font-semibold">{{ $termin->start_time }} - {{ $termin->end_time }}</div>
+                            </div>
                         </div>
-                        @endrole
 
+                        <div class="card-actions justify-end">
+                            @can('update', $termin)
+                                <a href="{{ route('termins.show', $termin) }}" class="btn btn-ghost btn-xs">View</a>
+                                <a href="{{ route('termins.edit', $termin) }}" class="btn btn-ghost btn-xs">Edit</a>
+                                <x-delete-confirmation-modal
+                                    id="delete-termin-{{ $termin->id }}"
+                                    :action="route('termins.destroy', $termin)"
+                                    title="Delete termin"
+                                    message="This will remove the scheduled termin and its reservation context."
+                                />
+                            @endcan
 
-                        <div>
-                            <div class="front-semibold">{{ $termin->room->name }}</div>
-                            <div class="mt-1">{{ $termin->date }} starts at {{ $termin->start_time }} and ends at {{ $termin->end_time }}</div>
-                            <div class="mt-1">Max capacity: {{ $termin->room->max_capacity }}</div>
-                            <div class="mt-1">Reserved: {{ $termin->reservations->count() }}</div>
-                            <div class="text-sm text-gray-500 mt-2"></div>
+                            @role('user')
+                                @if ($userReservation)
+                                    <x-delete-confirmation-modal
+                                        id="cancel-reservation-{{ $userReservation->id }}"
+                                        :action="route('reservations.destroy', $userReservation)"
+                                        title="Cancel reservation"
+                                        message="Your spot for this termin will be released."
+                                        button-label="Cancel Reservation"
+                                        trigger-label="Cancel Reservation"
+                                    />
+                                @elseif ($reservedCount < $capacity)
+                                    <form method="POST" action="{{ route('reservations.store') }}">
+                                        @csrf
+                                        <input type="hidden" name="termin_id" value="{{ $termin->id }}">
+                                        <button type="submit" class="btn btn-primary btn-xs">Reserve</button>
+                                    </form>
+                                @else
+                                    <span class="badge badge-error">Full</span>
+                                @endif
+                            @endrole
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="hero py-12">
-                    <div class="hero-content text-center">
-                        <div>
-                            <svg class="mx-auto h-12 w-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                            </svg>
-                            <p class="mt-4 text-base-content/60">No termins yet. Be the first to create a termin!</p>
-                        </div>
-                    </div>
+                <div class="rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center md:col-span-2 xl:col-span-3">
+                    <h2 class="text-lg font-semibold">No termins yet</h2>
+                    <p class="mt-2 text-base-content/60">Create a termin to make the schedule available.</p>
                 </div>
             @endforelse
         </div>

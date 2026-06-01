@@ -3,32 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Models\Termin;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class ReservationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): View
     {
-        $reservations = auth()->user()->reservations()->with('termin.room')->get();
+        $reservations = auth()->user()
+            ->reservations()
+            ->with('termin.room', 'termin.user', 'termin.reservations')
+            ->latest()
+            ->get();
 
         return view('reservations.index', compact('reservations'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): RedirectResponse
     {
-        //
+        return redirect()->route('reservations.index');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'termin_id' => 'required|exists:termins,id',
@@ -37,38 +36,51 @@ class ReservationController extends Controller
             'termin_id.exists' => 'The selected termin does not exist.',
         ]);
 
-        $termin = \App\Models\Termin::find($validated['termin_id']);
+        $termin = Termin::with('room', 'reservations')->findOrFail($validated['termin_id']);
 
         if ($termin->reservations->count() >= $termin->room->max_capacity) {
             return redirect('/termins')->with('error', 'This termin is already fully reserved.');
         }
 
+        $alreadyReserved = auth()->user()
+            ->reservations()
+            ->where('termin_id', $termin->id)
+            ->exists();
+
+        if ($alreadyReserved) {
+            return redirect('/termins')->with('error', 'You have already reserved this termin.');
+        }
+
         auth()->user()->reservations()->create($validated);
-        
+
         return redirect('/termins')->with('success', 'You have successfully reserved the termin!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Reservation $reservation)
+    public function show(Reservation $reservation): RedirectResponse
     {
-        //
+        return redirect()->route('reservations.index');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Reservation $reservation)
+    public function edit(Reservation $reservation): RedirectResponse
     {
-        //
+        return redirect()->route('reservations.index');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Reservation $reservation)
+    public function update(Request $request, Reservation $reservation): RedirectResponse
     {
+        $reservation->load('termin');
+
+        abort_unless(
+            auth()->user()->hasRole('admin') || auth()->id() === $reservation->termin->user_id,
+            403
+        );
+
+        $trainingStartsAt = Carbon::parse($reservation->termin->date.' '.$reservation->termin->start_time);
+
+        if (now()->lt($trainingStartsAt)) {
+            return back()->with('error', 'Attendance can be updated after the training starts.');
+        }
+
         $validated = $request->validate([
             'attended' => 'required|boolean',
             'user_id' => 'required|exists:users,id',
@@ -79,16 +91,21 @@ class ReservationController extends Controller
             'user_id.exists' => 'The specified user does not exist.',
         ]);
 
-        $reservation->update($validated);
-        return redirect('/termins/' . $reservation->termin_id)->with('success', 'Attendance status has been updated!');
+        abort_unless((int) $validated['user_id'] === $reservation->user_id, 403);
+
+        $reservation->update([
+            'attended' => $validated['attended'],
+        ]);
+
+        return redirect('/termins/'.$reservation->termin_id)->with('success', 'Attendance status has been updated!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Reservation $reservation)
+    public function destroy(Reservation $reservation): RedirectResponse
     {
+        abort_unless(auth()->id() === $reservation->user_id, 403);
+
         $reservation->delete();
-        return redirect('/termins')->with('success', 'Your reservation has been cancelled!');
+
+        return back()->with('success', 'Your reservation has been cancelled!');
     }
 }

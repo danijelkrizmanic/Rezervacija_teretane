@@ -3,56 +3,52 @@
         Users
     </x-slot:title>
 
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mt-8">All Users</h1>
+    <div class="space-y-8">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase text-primary">Administration</p>
+                <h1 class="text-3xl font-bold">Users</h1>
+                <p class="mt-2 text-base-content/70">Assign roles and keep application access aligned with responsibilities.</p>
+            </div>
+            <div class="stats w-full border border-base-300 bg-base-100 shadow-sm sm:w-auto">
+                <div class="stat">
+                    <div class="stat-title">Accounts</div>
+                    <div class="stat-value text-2xl">{{ $users->count() }}</div>
+                </div>
+            </div>
+        </div>
 
-        <div class="space-y-4 mt-8">
-            @forelse($users as $user)
-                <div class="card bg-base-100 shadow">
-                    <div class="card-body">
-
-                        @can('update', $user)
-                        <div class="flex gap-1">
-                            <a href="/users/{{ $user->id }}/edit" class="btn btn-ghost btn-xs">
-                                Edit
-                            </a>
-                            <form method="POST" action="/users/{{ $user->id }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    onclick="return confirm('Are you sure you want to delete this user?')"
-                                    class="btn btn-ghost btn-xs text-error">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                        @endcan
-
-                        <h2 class="card-title">{{ $user->name }}</h2>
-
-                        <div>
-                            <strong>ID:</strong> {{ $user->id }}
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            @forelse ($users as $user)
+                <div class="card border border-base-300 bg-base-100 shadow-sm">
+                    <div class="card-body gap-4">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="card-title">{{ $user->name }}</h2>
+                                <p class="text-sm text-base-content/60">{{ $user->email }}</p>
+                            </div>
+                            <span class="badge badge-primary badge-outline">#{{ $user->id }}</span>
                         </div>
 
-                        <div>
-                            <strong>Email:</strong> {{ $user->email }}
-                        </div>
-
-                        <div>
-                            <strong>Roles:</strong>
-                            @forelse($user->roles as $role)
-                                <span class="badge badge-primary">
-                                    {{ $role->name }}
-                                </span>
+                        <div class="flex flex-wrap gap-2">
+                            @forelse ($user->roles as $role)
+                                <span class="badge badge-neutral">{{ ucfirst($role->name) }}</span>
                             @empty
-                                <span>No role assigned</span>
+                                <span class="badge badge-warning">No role</span>
                             @endforelse
                         </div>
 
+                        @can('update', $user)
+                            <div class="card-actions justify-end">
+                                <a href="{{ route('users.edit', $user) }}" class="btn btn-ghost btn-xs">Edit Role</a>
+                            </div>
+                        @endcan
                     </div>
                 </div>
             @empty
-                <p>No users found.</p>
+                <div class="rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center md:col-span-2 xl:col-span-3">
+                    <h2 class="text-lg font-semibold">No users found</h2>
+                </div>
             @endforelse
         </div>
     </div>

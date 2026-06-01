@@ -10,8 +10,18 @@ class Reservation extends Model
     protected $fillable = [
         'user_id',
         'termin_id',
-        'attended'
+        'attended',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'attended' => 'boolean',
+        ];
+    }
 
     public function user(): BelongsTo
     {

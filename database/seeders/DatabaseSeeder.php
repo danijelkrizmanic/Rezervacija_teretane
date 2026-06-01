@@ -9,27 +9,29 @@ use Spatie\Permission\PermissionRegistrar;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        Permission::create(['name' => 'manage rooms']);
-        Permission::create(['name' => 'manage termins']);
-        Permission::create(['name' => 'manage users']);
-        Permission::create(['name' => 'manage termins for trainers']);
+        $manageRooms = Permission::firstOrCreate(['name' => 'manage rooms']);
+        $manageTermins = Permission::firstOrCreate(['name' => 'manage termins']);
+        $manageUsers = Permission::firstOrCreate(['name' => 'manage users']);
+        $manageTrainerTermins = Permission::firstOrCreate(['name' => 'manage termins for trainers']);
 
-        $adminRole = Role::create(['name' => 'admin']);
-        $adminRole->givePermissionTo('manage rooms');
-        $adminRole->givePermissionTo('manage termins');
-        $adminRole->givePermissionTo('manage termins for trainers');
-        $adminRole->givePermissionTo('manage users');
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->syncPermissions([
+            $manageRooms,
+            $manageTermins,
+            $manageTrainerTermins,
+            $manageUsers,
+        ]);
 
-        $trainerRole = Role::create(['name' => 'trainer']);
-        $trainerRole->givePermissionTo('manage termins');
+        $trainerRole = Role::firstOrCreate(['name' => 'trainer']);
+        $trainerRole->syncPermissions([
+            $manageRooms,
+            $manageTermins,
+        ]);
 
-        $userRole = Role::create(['name' => 'user']);
+        Role::firstOrCreate(['name' => 'user']);
     }
 }
