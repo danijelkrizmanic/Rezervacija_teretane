@@ -22,11 +22,6 @@ class ReservationController extends Controller
         return view('reservations.index', compact('reservations'));
     }
 
-    public function create(): RedirectResponse
-    {
-        return redirect()->route('reservations.index');
-    }
-
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -54,16 +49,6 @@ class ReservationController extends Controller
         auth()->user()->reservations()->create($validated);
 
         return redirect('/termins')->with('success', 'You have successfully reserved the termin!');
-    }
-
-    public function show(Reservation $reservation): RedirectResponse
-    {
-        return redirect()->route('reservations.index');
-    }
-
-    public function edit(Reservation $reservation): RedirectResponse
-    {
-        return redirect()->route('reservations.index');
     }
 
     public function update(Request $request, Reservation $reservation): RedirectResponse

@@ -21,30 +21,6 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): RedirectResponse
-    {
-        return redirect()->route('users.index');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        return redirect()->route('users.index');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id): RedirectResponse
-    {
-        return redirect()->route('users.index');
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id): View
@@ -72,13 +48,5 @@ class UserController extends Controller
         $user->syncRoles($validated['role']);
 
         return redirect('/users')->with('success', 'User role has been updated!');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id): RedirectResponse
-    {
-        return redirect()->route('users.index');
     }
 }

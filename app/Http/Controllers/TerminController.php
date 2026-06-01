@@ -48,11 +48,6 @@ class TerminController extends Controller
         return view('termins.index', compact('termins', 'rooms'));
     }
 
-    public function create(): RedirectResponse
-    {
-        return redirect()->route('termins.index');
-    }
-
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([

@@ -20,14 +20,6 @@ class RoomController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): RedirectResponse
-    {
-        return redirect()->route('rooms.index');
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request): RedirectResponse
@@ -45,14 +37,6 @@ class RoomController extends Controller
         Room::create($validated);
 
         return redirect('/rooms')->with('success', 'Your room has been created!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Room $room): RedirectResponse
-    {
-        return redirect()->route('rooms.index');
     }
 
     /**
