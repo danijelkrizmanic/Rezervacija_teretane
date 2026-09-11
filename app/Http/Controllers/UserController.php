@@ -10,9 +10,6 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): View
     {
         $users = User::with('roles')->get();
@@ -20,9 +17,6 @@ class UserController extends Controller
         return view('users.index', compact('users'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): View
     {
         $user = User::findOrFail($id);
@@ -31,9 +25,6 @@ class UserController extends Controller
         return view('users.edit', compact('user', 'roles'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         $user = User::findOrFail($id);

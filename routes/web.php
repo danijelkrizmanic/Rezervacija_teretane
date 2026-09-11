@@ -10,7 +10,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
-
 Route::middleware('auth')->group(function (): void {
     Route::resource('termins', TerminController::class)
         ->only(['index'])

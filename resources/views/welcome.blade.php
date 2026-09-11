@@ -32,6 +32,8 @@
         </div>
     </section>
 
+
+
     <section class="bg-base-100 px-4 py-14 sm:px-6 lg:px-8">
         <div class="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
             <div class="rounded-lg border border-base-300 bg-base-100 p-6">

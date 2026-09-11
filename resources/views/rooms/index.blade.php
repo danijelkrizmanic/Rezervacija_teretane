@@ -18,7 +18,7 @@
             </div>
         </div>
 
-        @can('manage rooms')
+        @can('admin')
             <div class="rounded-lg border border-base-300 bg-base-100 p-5 shadow-sm">
                 <form method="POST" action="{{ route('rooms.store') }}" class="grid gap-4 md:grid-cols-[1fr_180px_auto] md:items-end">
                     @csrf
@@ -63,7 +63,7 @@
                             <div class="badge badge-primary badge-outline">{{ $room->max_capacity }} people</div>
                         </div>
 
-                        @can('manage rooms')
+                        @can('admin')
                             <div class="card-actions justify-end">
                                 <a href="{{ route('rooms.edit', $room) }}" class="btn btn-ghost btn-xs">Edit</a>
                                 <x-delete-confirmation-modal

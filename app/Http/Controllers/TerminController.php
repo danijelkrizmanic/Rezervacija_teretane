@@ -141,9 +141,6 @@ class TerminController extends Controller
         return redirect('/termins')->with('success', 'Your termin has been deleted!');
     }
 
-    /**
-     * @param  array{room_id: int|string, start_time: string, end_time: string, date: string}  $data
-     */
     private function validateTerminConflicts(int $userId, array $data, ?int $ignoreTerminId = null): void
     {
         $userConflict = Termin::where('user_id', $userId)
@@ -155,7 +152,7 @@ class TerminController extends Controller
 
         if ($userConflict) {
             throw ValidationException::withMessages([
-                'start_time' => 'You already have a termin in that time range.',
+                'start_time' => 'Termin exists at this time.',
             ]);
         }
 
@@ -168,7 +165,7 @@ class TerminController extends Controller
 
         if ($roomConflict) {
             throw ValidationException::withMessages([
-                'room_id' => 'The room is already reserved in that time range.',
+                'room_id' => 'The room is already reserved.',
             ]);
         }
     }

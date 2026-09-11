@@ -13,9 +13,6 @@ class Reservation extends Model
         'attended',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
