@@ -1,46 +1,76 @@
 <x-layout>
     <x-slot:title>
-        Home Feed
+        My Reservations
     </x-slot:title>
 
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mt-8">My Reservations</h1>
-        <!-- Feed -->
-        <div class="space-y-4 mt-8">
+    <div class="space-y-8">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase text-primary">Member area</p>
+                <h1 class="text-3xl font-bold">My Reservations</h1>
+                <p class="mt-2 text-base-content/70">Review and cancel your booked gym sessions.</p>
+            </div>
+            <div class="stats w-full border border-base-300 bg-base-100 shadow-sm sm:w-auto">
+                <div class="stat">
+                    <div class="stat-title">Booked</div>
+                    <div class="stat-value text-2xl">{{ $reservations->count() }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             @forelse ($reservations as $reservation)
-                <div class="card big-base-100 shadow mt-8">
-                    <div class="card-body">
-                        <div class="flex gap-1">
-                                <form method="POST" action="/reservations/{{ $reservation->id }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        onclick="return confirm('Are you sure you want to cancel your reservation?')"
-                                        class="btn btn-ghost btn-xs text-error">
-                                        Cancel Reservation
-                                    </button>
-                                </form>
+                @php
+                    $trainingStartsAt = \Carbon\Carbon::parse($reservation->termin->date . ' ' . $reservation->termin->start_time);
+                    $isPastTraining = $trainingStartsAt->isPast();
+                @endphp
+
+                <div class="card border border-base-300 bg-base-100 shadow-sm">
+                    <div class="card-body gap-5">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="card-title">{{ $reservation->termin->room->name }}</h2>
+                                <p class="text-sm text-base-content/60">{{ $reservation->termin->user?->name ?? 'Trainer pending' }}</p>
+                            </div>
+                            <div class="badge badge-primary badge-outline">
+                                {{ $reservation->termin->reservations->count() }}/{{ $reservation->termin->room->max_capacity }}
+                            </div>
                         </div>
 
-                        <div>
-                            <div class="front-semibold">{{ $reservation->termin->room->name }}</div>
-                            <div class="mt-1">{{ $reservation->termin->date }} starts at {{ $reservation->termin->start_time }} and ends at {{ $reservation->termin->end_time }}</div>
-                            <div class="mt-1">Max capacity: {{ $reservation->termin->room->max_capacity }}</div>
-                            <div class="mt-1">Reserved: {{ $reservation->termin->reservations->count() }}</div>
-                            <div class="text-sm text-gray-500 mt-2"></div>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div class="rounded-lg bg-base-200 p-3">
+                                <div class="text-base-content/50">Date</div>
+                                <div class="font-semibold">{{ \Carbon\Carbon::parse($reservation->termin->date)->format('M d, Y') }}</div>
+                            </div>
+                            <div class="rounded-lg bg-base-200 p-3">
+                                <div class="text-base-content/50">Time</div>
+                                <div class="font-semibold">{{ $reservation->termin->start_time }} - {{ $reservation->termin->end_time }}</div>
+                            </div>
+                        </div>
+
+                        <div class="card-actions justify-end">
+                            @if ($isPastTraining)
+                                <span class="badge {{ $reservation->attended ? 'badge-success' : 'badge-warning' }}">
+                                    {{ $reservation->attended ? 'Attended' : 'Not attended' }}
+                                </span>
+                            @else
+                                <x-delete-confirmation-modal
+                                    id="cancel-reservation-page-{{ $reservation->id }}"
+                                    :action="route('reservations.destroy', $reservation)"
+                                    title="Cancel reservation"
+                                    message="Your spot for this termin will be released."
+                                    button-label="Cancel Reservation"
+                                    trigger-label="Cancel Reservation"
+                                />
+                            @endif
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="hero py-12">
-                    <div class="hero-content text-center">
-                        <div>
-                            <svg class="mx-auto h-12 w-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                            </svg>
-                            <p class="mt-4 text-base-content/60">No reservations yet. Be the first to create a reservation!</p>
-                        </div>
-                    </div>
+                <div class="rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center md:col-span-2 xl:col-span-3">
+                    <h2 class="text-lg font-semibold">No reservations yet</h2>
+                    <p class="mt-2 text-base-content/60">Reserve a termin to see it here.</p>
+                    <a href="{{ route('termins.index') }}" class="btn btn-primary btn-sm mt-4">Browse Termins</a>
                 </div>
             @endforelse
         </div>

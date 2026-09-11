@@ -3,87 +3,70 @@
         Register
     </x-slot:title>
 
-    <div class="hero min-h-[calc(100vh-16rem)]">
-        <div class="hero-content flex-col">
-            <div class="card w-96 bg-base-100">
-                <div class="card-body">
-                    <h1 class="mt-1 text-xl font-bold text-center mb-6">Create Account</h1>
+    <div class="mx-auto grid min-h-[calc(100vh-13rem)] max-w-5xl items-center gap-8 lg:grid-cols-[1fr_420px]">
+        <div class="hidden lg:block">
+            <p class="text-sm font-semibold uppercase text-primary">Start reserving</p>
+            <h1 class="mt-3 text-4xl font-extrabold leading-tight">Create a member account and book your next session.</h1>
+            <p class="mt-4 text-lg text-base-content/70">New accounts start with the User role so reservations stay focused and protected from admin-only areas.</p>
+        </div>
 
-                    <form method="POST" action="/register">
-                        @csrf
+        <div class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+            <h2 class="text-2xl font-bold">Create Account</h2>
 
-                        <!-- Name -->
-                        <label class="floating-label mb-6">
-                            <input type="text"
-                                   name="name"
-                                   placeholder="John Doe"
-                                   value="{{ old('name') }}"
-                                   class="input input-bordered @error('name') input-error @enderror"
-                                   required>
-                            <span>Name</span>
-                        </label>
-                        @error('name')
-                            <div class="label -mt-4 mb-2">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
+            <form method="POST" action="{{ url('/register') }}" class="mt-6 space-y-4">
+                @csrf
 
-                        <!-- Email -->
-                        <label class="floating-label mb-6">
-                            <input type="email"
-                                   name="email"
-                                   placeholder="mail@example.com"
-                                   value="{{ old('email') }}"
-                                   class="input input-bordered @error('email') input-error @enderror"
-                                   required>
-                            <span>Email</span>
-                        </label>
-                        @error('email')
-                            <div class="label -mt-4 mb-2">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
-
-                        <!-- Password -->
-                        <label class="floating-label mb-6">
-                            <input type="password"
-                                   name="password"
-                                   placeholder="••••••••"
-                                   class="input input-bordered @error('password') input-error @enderror"
-                                   required>
-                            <span>Password</span>
-                        </label>
-                        @error('password')
-                            <div class="label -mt-4 mb-2">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
-
-                        <!-- Password Confirmation -->
-                        <label class="floating-label mb-6">
-                            <input type="password"
-                                   name="password_confirmation"
-                                   placeholder="••••••••"
-                                   class="input input-bordered"
-                                   required>
-                            <span>Confirm Password</span>
-                        </label>
-
-                        <!-- Submit Button -->
-                        <div class="form-control mt-8">
-                            <button type="submit" class="btn btn-primary btn-sm w-full">
-                                Register
-                            </button>
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text font-medium">Name</span>
+                    </div>
+                    <input type="text" name="name" value="{{ old('name') }}" class="input input-bordered w-full bg-base-100 @error('name') input-error @enderror" required>
+                    @error('name')
+                        <div class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
                         </div>
-                    </form>
+                    @enderror
+                </label>
 
-                    <div class="divider">OR</div>
-                    <p class="text-center text-sm">
-                        Already have an account?
-                        <a href="/login" class="link link-primary">Sign in</a>
-                    </p>
-                </div>
-            </div>
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text font-medium">Email</span>
+                    </div>
+                    <input type="email" name="email" value="{{ old('email') }}" class="input input-bordered w-full bg-base-100 @error('email') input-error @enderror" required>
+                    @error('email')
+                        <div class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text font-medium">Password</span>
+                    </div>
+                    <input type="password" name="password" class="input input-bordered w-full bg-base-100 @error('password') input-error @enderror" required>
+                    @error('password')
+                        <div class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text font-medium">Confirm password</span>
+                    </div>
+                    <input type="password" name="password_confirmation" class="input input-bordered w-full bg-base-100" required>
+                </label>
+
+                <button type="submit" class="btn btn-primary w-full">Register</button>
+            </form>
+
+            <div class="divider">OR</div>
+            <p class="text-center text-sm">
+                Already have an account?
+                <a href="{{ url('/login') }}" class="link link-primary">Sign in</a>
+            </p>
         </div>
     </div>
 </x-layout>

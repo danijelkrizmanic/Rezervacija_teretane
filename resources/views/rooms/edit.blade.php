@@ -3,47 +3,46 @@
         Edit Room
     </x-slot:title>
 
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mt-8">Edit Room</h1>
+    <div class="mx-auto max-w-2xl space-y-6">
+        <div>
+            <p class="text-sm font-semibold uppercase text-primary">Facility</p>
+            <h1 class="text-3xl font-bold">Edit Room</h1>
+        </div>
 
-        <div class="card bg-base-100 mt-8">
-            <div class="card-body">
-                <form method="POST" action="/rooms/{{ $room->id }}">
-                    @csrf
-                    @method('PUT')
+        <div class="rounded-lg border border-base-300 bg-base-100 p-6 shadow-sm">
+            <form method="POST" action="{{ route('rooms.update', $room) }}" class="space-y-4">
+                @csrf
+                @method('PUT')
 
-                    <div class="form-control w-full">
-                        <input type="text" name="name" class="input input-bordered w-full @error('name') input-error @enderror"
-                            placeholder="Room Name" value="{{ old('name', $room->name) }}" required>
-
-                        @error('name')
-                            <div class="label">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text font-medium">Room name</span>
                     </div>
+                    <input type="text" name="name" class="input input-bordered w-full bg-base-100 @error('name') input-error @enderror" value="{{ old('name', $room->name) }}" required>
+                    @error('name')
+                        <div class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </label>
 
-                    <div class="form-control w-full mt-4">
-                        <input type="number" name="max_capacity" class="input input-bordered w-full @error('max_capacity') input-error @enderror"
-                            placeholder="Maximum Capacity" value="{{ old('max_capacity', $room->max_capacity) }}" required>
-
-                        @error('max_capacity')
-                            <div class="label">
-                                <span class="label-text-alt text-error">{{ $message }}</span>
-                            </div>
-                        @enderror
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text font-medium">Maximum capacity</span>
                     </div>
+                    <input type="number" name="max_capacity" class="input input-bordered w-full bg-base-100 @error('max_capacity') input-error @enderror" value="{{ old('max_capacity', $room->max_capacity) }}" min="1" required>
+                    @error('max_capacity')
+                        <div class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </label>
 
-                    <div class="card-actions justify-between mt-4">
-                        <a href="/rooms" class="btn btn-ghost btn-sm">
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            Update Room
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <div class="flex items-center justify-between pt-2">
+                    <a href="{{ route('rooms.index') }}" class="btn btn-ghost btn-sm">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-sm">Update Room</button>
+                </div>
+            </form>
         </div>
     </div>
 </x-layout>
